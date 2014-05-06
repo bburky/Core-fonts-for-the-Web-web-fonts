@@ -1,63 +1,34 @@
 <!doctype html>
+<title>Core fonts for the Web web fonts demo</title>
+<style>
+body {
+  font-family: comic-blob;
+}
+</style>
 <script>
+var Module = {
+  arguments: ['--filter', 'Comic.TTF', 'comic32.exe'],
+  canvas: document.createElement('canvas'),
+  preRun: function() {
+    // This triggers emscripten's Browser.init() which expects Module['canvas'], even if it's not needed
+    FS.createPreloadedFile('/', 'comic32.exe', 'comic32.exe', true, false);
+  },
+  postRun: function() {
+    FS.chmod('Comic.TTF', 0666);
+    var arrayBufferView = FS.readFile('Comic.TTF');
+    loadFont(arrayBufferView);
+  }
+};
 
-// Global `Module` for emscripten
-var Module;
-
-function init() {
-  download();
-}
-
-function download() {
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', 'comic32.exe', true );
-  xhr.responseType = 'arraybuffer';
-  xhr.onload = function(e) {
-    var arrayBufferView = new Uint8Array(this.response);
-    run(arrayBufferView);
-  };
-  xhr.send();
-}
-
-function run(arrayBufferView) {
-  Module = {
-    arguments: ['--filter', 'Comic.TTF', 'comic32.exe'],
-    preRun: function() {
-      // This doesn't work, not sure if it should. Load it manually instead via XHR.
-      // FS.createPreloadedFile('/', 'comic32.exe', 'comic32.exe', true, false);
-      FS.writeFile('comic32.exe', arrayBufferView, {encoding:'binary'});
-    },
-    postRun: function() {
-      FS.chmod('Comic.TTF', 0777);
-      var array = FS.readFile('Comic.TTF', {encoding: 'binary'});
-      loadFont(array);
-    }
-  };
-
-  var script = document.createElement('script');
-  script.src = 'cabextract.js';
-  document.head.appendChild(script);
-}
-
-function loadFont(array) {
-  var blob = new Blob([ array ]);
+function loadFont(arrayBufferView) {
+  var blob = new Blob([arrayBufferView], {type: 'application/x-font-ttf'});
   var url = window.URL || window.webkitURL;
   var blobUrl = url.createObjectURL(blob);
 
   var style = document.createElement('style');
   document.head.appendChild(style);
-  style.sheet.insertRule('@font-face { font-family: comic; src: url(' + blobUrl + '); }', style.sheet.length);
-  style.sheet.insertRule('body { font-family: comic, monospace; }', style.sheet.length);
-
-  useFont();
+  style.sheet.insertRule('@font-face { font-family: comic-blob; src: url(' + blobUrl + '); }', style.sheet.length);
 }
-
-function useFont() {
-  var test = document.createElement('h1');
-  test.textContent = 'Comic Sans MS'
-  document.body.appendChild(test);
-}
-
-init();
-
 </script>
+<script src="cabextract.js"></script>
+<h1>Comic Sans MS</h1>
