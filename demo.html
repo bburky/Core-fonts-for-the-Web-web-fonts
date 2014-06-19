@@ -11,7 +11,7 @@ var Module = {
   canvas: document.createElement('canvas'),
   preRun: function() {
     // This triggers emscripten's Browser.init() which expects Module['canvas'], even if it's not needed
-    FS.createPreloadedFile('/', 'comic32.exe', 'comic32.exe', true, false);
+    FS.createPreloadedFile('/', 'comic32.exe', '//dl.dropboxusercontent.com/u/2950460/core-fonts-for-the-web/comic32.exe', true, false);
   },
   postRun: function() {
     FS.chmod('Comic.TTF', 0666);
